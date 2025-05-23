@@ -1,0 +1,485 @@
+[
+    {
+        "id": "1a994ea59b709a69",
+        "type": "tab",
+        "label": "Flujo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "eb3ce3ec6b00fd29",
+        "type": "group",
+        "z": "1a994ea59b709a69",
+        "name": "Recoger los datos api",
+        "style": {
+            "stroke": "#7fb7df",
+            "label": true,
+            "fill": "#7fb7df",
+            "label-position": "n",
+            "color": "#ffffff"
+        },
+        "nodes": [
+            "d1a66e41f1395b85",
+            "d78aa68047415e1c",
+            "b61343b4dac3bbcc",
+            "8b8b5f4a.47c65"
+        ],
+        "x": 74,
+        "y": 39,
+        "w": 872,
+        "h": 82
+    },
+    {
+        "id": "05b8215051ef476a",
+        "type": "group",
+        "z": "1a994ea59b709a69",
+        "name": "Base de datos",
+        "style": {
+            "stroke": "#3f93cf",
+            "fill": "#ff7f7f",
+            "label": true,
+            "label-position": "n",
+            "color": "#ffffff"
+        },
+        "nodes": [
+            "fed103ac1d0cf212",
+            "aad6a4f05621582e",
+            "bb5787c64fc59d94"
+        ],
+        "x": 654,
+        "y": 139,
+        "w": 492,
+        "h": 142
+    },
+    {
+        "id": "cbb8ce2fa11fd29b",
+        "type": "group",
+        "z": "1a994ea59b709a69",
+        "name": "Kafka",
+        "style": {
+            "fill": "#c8e7a7",
+            "label": true,
+            "label-position": "n",
+            "color": "#ffffff"
+        },
+        "nodes": [
+            "68da4bd327ecbf24",
+            "1febeb18e935ce8e"
+        ],
+        "x": 614,
+        "y": 319,
+        "w": 492,
+        "h": 82
+    },
+    {
+        "id": "419d8efa2f98e8b8",
+        "type": "group",
+        "z": "1a994ea59b709a69",
+        "name": "Guardar archivos JSON",
+        "style": {
+            "label": true,
+            "label-position": "n",
+            "color": "#ffffff",
+            "fill": "#7f8faf"
+        },
+        "nodes": [
+            "ec2451179a220f2a",
+            "03629dc970434063",
+            "8dc59120f412e652"
+        ],
+        "x": 454,
+        "y": 439,
+        "w": 712,
+        "h": 82
+    },
+    {
+        "id": "69adc1a0013800ad",
+        "type": "group",
+        "z": "1a994ea59b709a69",
+        "name": "API DE HISTORICO",
+        "style": {
+            "fill": "#ffcf3f",
+            "label": true,
+            "label-position": "n",
+            "color": "#ffffff"
+        },
+        "nodes": [
+            "e88c8830fcb3bbed",
+            "b02b47868a9d309e",
+            "7d20e83b6c200ee2"
+        ],
+        "x": 74,
+        "y": 579,
+        "w": 712,
+        "h": 82
+    },
+    {
+        "id": "d1a66e41f1395b85",
+        "type": "http request",
+        "z": "1a994ea59b709a69",
+        "g": "eb3ce3ec6b00fd29",
+        "name": "API STORM GLASS",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Authorization",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "461a4c52-2774-11f0-88e2-0242ac130003-461a4cb6-2774-11f0-88e2-0242ac130003"
+            }
+        ],
+        "x": 600,
+        "y": 80,
+        "wires": [
+            [
+                "d78aa68047415e1c",
+                "ec2451179a220f2a",
+                "fed103ac1d0cf212"
+            ]
+        ]
+    },
+    {
+        "id": "d78aa68047415e1c",
+        "type": "debug",
+        "z": "1a994ea59b709a69",
+        "g": "eb3ce3ec6b00fd29",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "fed103ac1d0cf212",
+        "type": "function",
+        "z": "1a994ea59b709a69",
+        "g": "05b8215051ef476a",
+        "name": "Recogida de Datos",
+        "func": "\nif (!msg.payload || !msg.payload.hours || msg.payload.hours.length === 0) {\n    node.error(\"La respuesta de Storm Glass no contiene datos en 'hours' o está vacío.\");\n    return null;\n}\n\n\nlet hours = msg.payload.hours;\nlet stormGlassWeather = hours[hours.length - 1];\n\nlet injectTimestamp = new Date(stormGlassWeather.time).toISOString();\n\nmsg.payload = {\n    id: \"weather-36.96--122.02\", \n    temperature: {\n        value: stormGlassWeather.airTemperature.noaa, \n        type: \"Number\"\n    },\n    windSpeed: {\n        value: stormGlassWeather.windSpeed.noaa, \n        type: \"Number\"\n    },\n    waveHeight: {\n        value: stormGlassWeather.waveHeight.noaa, \n        type: \"Number\"\n    },\n    humidity: {\n        value: stormGlassWeather.humidity.noaa,\n        type: \"Number\"\n    },\n    precipitation: {\n        value: stormGlassWeather.precipitation.noaa, \n    },\n    cloudCover: {\n        value: stormGlassWeather.cloudCover.noaa, \n        type: \"Number\"\n    },\n    pressure: {\n        value: stormGlassWeather.pressure.noaa, \n        type: \"Number\"\n    },\n    location: {\n        type: \"geo:json\",\n        value: {\n            type: \"Point\",\n            coordinates: [-122.02, 36.96] \n        }\n    },\n    source: {\n        type: \"Text\",\n        value: \"Storm Glass\"\n    },\n    address: {\n        type: \"Text\",\n        value: \"Ubicación desconocida\"\n    },\n    horaRecogidaDato: {\n        value: injectTimestamp,\n        type: \"DateTime\"\n    }\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 200,
+        "wires": [
+            [
+                "aad6a4f05621582e",
+                "bb5787c64fc59d94",
+                "68da4bd327ecbf24"
+            ]
+        ]
+    },
+    {
+        "id": "aad6a4f05621582e",
+        "type": "debug",
+        "z": "1a994ea59b709a69",
+        "g": "05b8215051ef476a",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "68da4bd327ecbf24",
+        "type": "function",
+        "z": "1a994ea59b709a69",
+        "g": "cbb8ce2fa11fd29b",
+        "name": "Conexion a kafka",
+        "func": "var message = msg.payload;\nmsg.payload = JSON.stringify(message);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 360,
+        "wires": [
+            [
+                "1febeb18e935ce8e"
+            ]
+        ]
+    },
+    {
+        "id": "b61343b4dac3bbcc",
+        "type": "inject",
+        "z": "1a994ea59b709a69",
+        "g": "eb3ce3ec6b00fd29",
+        "name": "",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "storm-glass-datos",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 80,
+        "wires": [
+            [
+                "8b8b5f4a.47c65"
+            ]
+        ]
+    },
+    {
+        "id": "1febeb18e935ce8e",
+        "type": "kafkajs-producer",
+        "z": "1a994ea59b709a69",
+        "g": "cbb8ce2fa11fd29b",
+        "name": "",
+        "client": "a5ba1e66e0c585e6",
+        "topic": "",
+        "advancedoptions": false,
+        "acknowledge": "all",
+        "partition": "",
+        "headeritems": {},
+        "key": "",
+        "responsetimeout": 30000,
+        "transactiontimeout": 60000,
+        "metadatamaxage": 300000,
+        "allowautotopiccreation": false,
+        "x": 990,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ec2451179a220f2a",
+        "type": "function",
+        "z": "1a994ea59b709a69",
+        "g": "419d8efa2f98e8b8",
+        "name": "Recogida de Datos para escribir",
+        "func": "\nif (!msg.payload || !msg.payload.hours || msg.payload.hours.length === 0) {\n    node.error(\"La respuesta de Storm Glass no contiene datos en 'hours' o está vacío.\");\n    return null;\n}\n\n\nlet stormGlassWeather = msg.payload.hours[msg.payload.hours.length - 1]; \n\nlet injectTimestamp = msg.payload.timestamp || new Date().toISOString();\n\nmsg.payload = \n{\n    id: \"weather-36.96--122.02\", \n    temperature: stormGlassWeather.airTemperature.noaa,\n    windSpeed: stormGlassWeather.windSpeed.noaa,\n    waveHeight: stormGlassWeather.waveHeight.noaa,\n    humidity: stormGlassWeather.humidity.noaa,\n    precipitation: stormGlassWeather.precipitation.noaa,\n    cloudCover: stormGlassWeather.cloudCover.noaa,\n    pressure: stormGlassWeather.pressure.noaa,\n    location: {\n        type: \"Point\",\n        coordinates: [-122.02, 36.96]\n    },\n    source: \"Storm Glass\",\n    address: \"Ubicación desconocida\",\n    horaRecogidaDato: injectTimestamp\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 480,
+        "wires": [
+            [
+                "03629dc970434063"
+            ]
+        ]
+    },
+    {
+        "id": "03629dc970434063",
+        "type": "file",
+        "z": "1a994ea59b709a69",
+        "g": "419d8efa2f98e8b8",
+        "name": "objetos.json",
+        "filename": "/data/datos_storm.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 890,
+        "y": 480,
+        "wires": [
+            [
+                "8dc59120f412e652"
+            ]
+        ]
+    },
+    {
+        "id": "8dc59120f412e652",
+        "type": "debug",
+        "z": "1a994ea59b709a69",
+        "g": "419d8efa2f98e8b8",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "bb5787c64fc59d94",
+        "type": "mongodb out",
+        "z": "1a994ea59b709a69",
+        "g": "05b8215051ef476a",
+        "mongodb": "bfbaa9e92a2c524e",
+        "name": "mongo",
+        "collection": "pruebac",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 1010,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "8b8b5f4a.47c65",
+        "type": "function",
+        "z": "1a994ea59b709a69",
+        "g": "eb3ce3ec6b00fd29",
+        "name": "Generate URL",
+        "func": "let now = new Date();\n\n\nnow.setMinutes(0, 0, 0);\nlet isoTime = now.toISOString(); \n\nlet baseUrl = \"https://api.stormglass.io/v2/weather/point\";\nlet lat = 36.96;\nlet lng = -122.02;\nlet params = \"waveHeight,windSpeed,airTemperature,humidity,precipitation,cloudCover,pressure\";\nlet source = \"noaa\";\n\n\nmsg.method = \"GET\";\nmsg.url = `${baseUrl}?lat=${lat}&lng=${lng}&params=${params}&start=${isoTime}&end=${isoTime}&source=${source}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 80,
+        "wires": [
+            [
+                "d1a66e41f1395b85"
+            ]
+        ]
+    },
+    {
+        "id": "e88c8830fcb3bbed",
+        "type": "inject",
+        "z": "1a994ea59b709a69",
+        "g": "69adc1a0013800ad",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b02b47868a9d309e",
+        "type": "http request",
+        "z": "1a994ea59b709a69",
+        "g": "69adc1a0013800ad",
+        "name": "API STORM GLASS",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://api.stormglass.io/v2/weather/point?lat=36.96&lng=-122.02&params=waveHeight,windSpeed,airTemperature,humidity,precipitation,cloudCover,pressure",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Authorization",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "461a4c52-2774-11f0-88e2-0242ac130003-461a4cb6-2774-11f0-88e2-0242ac130003"
+            }
+        ],
+        "x": 440,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7d20e83b6c200ee2",
+        "type": "debug",
+        "z": "1a994ea59b709a69",
+        "g": "69adc1a0013800ad",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "a5ba1e66e0c585e6",
+        "type": "kafkajs-client",
+        "name": "Kafka broker",
+        "brokers": "172.17.0.1:29092",
+        "clientid": "prueba",
+        "connectiontimeout": "3000",
+        "requesttimeout": "25000",
+        "advancedretry": false,
+        "maxretrytime": "30000",
+        "initialretrytime": "300",
+        "factor": "0.2",
+        "multiplier": "2",
+        "retries": "5",
+        "auth": "none",
+        "tlsselfsign": false,
+        "tlscacert": "",
+        "tlsclientcert": "",
+        "tlsprivatekey": "",
+        "tlspassphrase": "",
+        "saslssl": true,
+        "saslmechanism": "plain",
+        "loglevel": "error"
+    },
+    {
+        "id": "bfbaa9e92a2c524e",
+        "type": "mongodb",
+        "hostname": "172.17.0.1",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": "27018",
+        "db": "prueba1",
+        "name": "dadsad"
+    }
+]
